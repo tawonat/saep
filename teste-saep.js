@@ -1,125 +1,131 @@
 const { Builder, By, Key, until } = require('selenium-webdriver');
 
-async function testeCompletoApp() {
+async function testeSaepV2() {
     // Inicializa o navegador
     let driver = await new Builder().forBrowser('chrome').build();
 
     try {
         // =================================================================
-        // 1. ACESSAR A URL (Ajuste para o caminho do seu arquivo)
+        // 1. CONFIGURAÇÃO INICIAL
         // =================================================================
-        // Exemplo local: 'file:///C:/Users/SeuNome/Desktop/projeto/index.html'
-        // Exemplo servidor: 'http://127.0.0.1:5500/index.html'
+        // IMPORTANTE: Troque pelo caminho do seu arquivo novo
         await driver.get('http://127.0.0.1:5500/saep/index.html'); 
-        
-        console.log(">> Site carregado.");
+        console.log(">> 🚀 Iniciando testes do SAEP Digital...");
 
         // =================================================================
         // 2. TELA DE LOGIN
         // =================================================================
-        // Como não tem ID, usamos CSS Selector pelo placeholder
-        await driver.wait(until.elementLocated(By.css("input[placeholder='Nome']")), 5000);
+        // Espera e preenche o Nome (placeholder mudou para "Seu nome")
+        await driver.wait(until.elementLocated(By.css("input[placeholder='Seu nome']")), 5000);
+        await driver.findElement(By.css("input[placeholder='Seu nome']")).sendKeys("Tester Automatizado");
         
-        await driver.findElement(By.css("input[placeholder='Nome']")).sendKeys("Robô Selenium");
-        await driver.findElement(By.css("input[placeholder='Ex: Senai Shunji Nishimura']")).sendKeys("Escola Teste");
-        await driver.findElement(By.css("input[placeholder='000.000.000-00']")).sendKeys("123.123.123-99");
-        
-        // Clica no botão de acessar
-        await driver.findElement(By.css(".btn-primary")).click();
-        console.log(">> Login realizado.");
+        // Preenche Escola e CPF
+        await driver.findElement(By.css("input[placeholder='Senai Shunji Nishimura']")).sendKeys("Escola Tech");
+        await driver.findElement(By.css("input[placeholder='000.000.000-00']")).sendKeys("999.888.777-66");
+
+        // Clica no botão ACESSAR SISTEMA
+        // Dica: Usamos xpath para garantir que clicamos no botão certo pelo texto
+        const btnLogin = await driver.findElement(By.xpath("//button[contains(text(), 'ACESSAR SISTEMA')]"));
+        await btnLogin.click();
+        console.log(">> ✅ Login realizado.");
 
         // =================================================================
         // 3. SELEÇÃO DE ANO
         // =================================================================
-        // Espera os cards de ano (.card-year) serem criados pelo JS
         await driver.wait(until.elementLocated(By.css(".card-year")), 5000);
         
-        // Pega todos os anos e clica no primeiro (índice 0) ou no segundo (índice 1)
-        let anos = await driver.findElements(By.className("card-year"));
-        if (anos.length > 0) {
-            await anos[0].click(); // Clica no mais recente (2025)
-            console.log(">> Ano selecionado.");
-        }
+        // Vamos clicar no ano 2024 (que tem a bolinha verde 'new' no seu CSS)
+        // O Xpath abaixo procura um .card-year que tenha o texto "2024" dentro
+        let anoAlvo = await driver.findElement(By.xpath("//div[contains(@class, 'card-year') and .//span[contains(text(), '2024')]]"));
+        await anoAlvo.click();
+        console.log(">> ✅ Ano 2024 selecionado.");
 
         // =================================================================
         // 4. LISTA DE PROVAS
         // =================================================================
-        // Espera a lista de provas aparecer
         await driver.wait(until.elementLocated(By.className("card-exam")), 5000);
         
-        // Clica na primeira prova da lista
+        // Clica na Prova 03 (índice 2 do array)
         let provas = await driver.findElements(By.className("card-exam"));
-        await provas[0].click();
-        console.log(">> Prova iniciada.");
+        await provas[2].click(); 
+        console.log(">> ✅ Prova 03 iniciada.");
 
         // =================================================================
-        // 5. RESPONDENDO QUESTÕES (Loop)
+        // 5. RESPONDENDO QUESTÕES (Loop Inteligente)
         // =================================================================
-        // Vamos responder 5 questões para testar
-        const QTD_PARA_RESPONDER = 40; 
-
-        // Espera a tela da prova carregar
         await driver.wait(until.elementLocated(By.id("screen-taking-exam")), 5000);
 
+        // Vamos responder 6 questões (para passar pela questão 5 que tem imagem)
+        const QTD_PARA_RESPONDER = 40; 
+
         for (let i = 0; i < QTD_PARA_RESPONDER; i++) {
-            // Espera as opções (.option-item) aparecerem na tela
-            // O wait aqui é crucial porque o DOM é recriado a cada "Próxima"
+            // Espera as opções carregarem
             await driver.wait(until.elementLocated(By.className("option-item")), 5000);
             
-            // Pega as 5 opções (A, B, C, D, E)
-            let opcoes = await driver.findElements(By.className("option-item"));
+            // --- VERIFICAÇÃO DE IMAGEM (NOVO) ---
+            // Verifica se a imagem está visível (sem a classe hidden-img)
+            let imgElement = await driver.findElement(By.id("q-imagem-preview"));
+            let classeImagem = await imgElement.getAttribute("class");
             
-            // Escolhe uma aleatória entre 0 e 4
+            if (!classeImagem.includes("hidden-img")) {
+                let src = await imgElement.getAttribute("src");
+                console.log(`   [INFO] Imagem detectada na Questão ${i+1}: ${src.substring(0, 30)}...`);
+            }
+            // ------------------------------------
+
+            // Seleciona uma opção aleatória
+            let opcoes = await driver.findElements(By.className("option-item"));
             let randomOpt = Math.floor(Math.random() * opcoes.length);
             await opcoes[randomOpt].click();
             
-            console.log(`>> Questão ${i + 1} respondida (Opção índice ${randomOpt})`);
+            console.log(`>> Questão ${i + 1} respondida.`);
 
-            // Se não for a última interação do loop, clica em Próxima
+            // Clica em próxima (se não for a última interação)
             if (i < QTD_PARA_RESPONDER - 1) {
                 await driver.findElement(By.id("btn-next")).click();
-                await driver.sleep(500); // Pequena pausa para transição visual
+                await driver.sleep(500); // Pausa visual
             }
         }
 
         // =================================================================
-        // 6. FINALIZAR PROVA (Tratando window.confirm e window.alert)
+        // 6. FINALIZAR PROVA
         // =================================================================
-        console.log(">> Clicando em Finalizar...");
+        console.log(">> Tentando finalizar...");
         
-        // Clica no botão Enviar
         let btnFinish = await driver.findElement(By.className("btn-finish"));
-        // Scroll para garantir que o botão está visível
         await driver.executeScript("arguments[0].scrollIntoView(true);", btnFinish);
         await driver.sleep(500);
         await btnFinish.click();
 
-        // --- TRATAMENTO DO CONFIRM ---
-        // O seu código tem um confirm() ("Deseja realmente finalizar?").
-        // O Selenium precisa trocar o foco para o alerta.
+        // Lida com o CONFIRM do navegador ("Você respondeu apenas X questões...")
         await driver.wait(until.alertIsPresent(), 5000);
-        let alertaConfirmacao = await driver.switchTo().alert();
-        console.log(">> Texto do Confirm: " + await alertaConfirmacao.getText());
-        await alertaConfirmacao.accept(); // Clica em "OK"
-
-        // --- TRATAMENTO DO ALERT DE SUCESSO ---
-        // Depois do confirm, seu código lança um alert("Prova enviada...").
-        // Precisamos aceitar esse também.
-        await driver.wait(until.alertIsPresent(), 5000);
-        let alertaSucesso = await driver.switchTo().alert();
-        console.log(">> Texto do Alert final: " + await alertaSucesso.getText());
-        await alertaSucesso.accept(); // Clica em "OK"
-
-        console.log(">> TESTE CONCLUÍDO COM SUCESSO! ✅");
+        await driver.switchTo().alert().accept();
         
-        // Pausa para você ver o resultado antes de fechar
-        await driver.sleep(3000);
+        console.log(">> Alert aceito.");
+
+        // =================================================================
+        // 7. VERIFICAÇÃO DE RESULTADOS (NOVO)
+        // =================================================================
+        // Agora esperamos a tela de resultado aparecer (não é mais reload)
+        await driver.wait(until.elementIsVisible(driver.findElement(By.id("screen-result"))), 5000);
+        
+        // Verifica se o gráfico foi criado (canvas)
+        let canvasGrafico = await driver.findElement(By.id("graficoResultado"));
+        if(await canvasGrafico.isDisplayed()) {
+            console.log(">> ✅ Gráfico de desempenho gerado com sucesso.");
+        }
+
+        // Captura o texto de acertos
+        let txtAcertos = await driver.findElement(By.id("txt-acertos")).getText();
+        console.log(`>> 📊 RESULTADO FINAL: Você acertou ${txtAcertos} questões.`);
+
+        await driver.sleep(5000); // Tempo para admirar o gráfico
 
     } catch (erro) {
-        console.error("❌ Erro durante o teste:", erro);
+        console.error("❌ ERRO NO TESTE:", erro);
     } finally {
         await driver.quit();
     }
 }
 
-testeCompletoApp();
+testeSaepV2();
