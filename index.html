@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROVAS SAEP biston</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>SAEP - Sistema de Avaliação</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -13,25 +14,25 @@
         <div class="login-wrapper">
             <div class="brand">
                 <span class="material-symbols-outlined icon-logo">school</span>
-                <h1>Prova SAEP</h1>
+                <h1>SAEP Digital</h1>
             </div>
             <div class="login-card">
-                <h2>Identificação/Login</h2>
+                <h2>Identificação</h2>
                 
-                   <div class="input-group">
-                    <label>Nome Completo</label>
-                    <input type="text" placeholder="Nome">
+                <div class="input-group">
+                    <label>Nome Completo do Aluno</label>
+                    <input type="text" placeholder="Seu nome">
                 </div>
                 <div class="input-group">
                     <label>Nome da Escola</label>
-                    <input type="text" placeholder="Ex: Senai Shunji Nishimura">
+                    <input type="text" placeholder="Senai Shunji Nishimura">
                 </div>
                 <div class="input-group">
                     <label>CPF</label>
                     <input type="text" placeholder="000.000.000-00">
                 </div>
-
-                <button class="btn-primary" onclick="irPara('screen-years')">ACESSAR PROVAS</button>
+                
+                <button class="btn-primary" onclick="irPara('screen-years')">ACESSAR SISTEMA</button>
             </div>
         </div>
     </section>
@@ -39,10 +40,8 @@
     <section id="screen-years" class="screen hidden">
         <div class="container-center">
             <button class="btn-back" onclick="irPara('screen-login')">Voltar</button>
-            <h1 class="page-title">Selecione o Ano da Prova</h1>
-            
-            <div id="year-grid" class="cards-year-wrapper">
-                </div>
+            <h1 class="page-title">Selecione o Ano</h1>
+            <div id="year-grid" class="cards-year-wrapper"></div>
         </div>
     </section>
 
@@ -65,40 +64,35 @@
 
     <section id="screen-taking-exam" class="screen hidden">
         <div class="exam-layout">
-            
             <aside class="sidebar">
                 <div class="sidebar-header">
                     <h3>Questões</h3>
                     <p>40 Questões</p>
                 </div>
-                <div class="grid-40" id="nav-grid">
-                    </div>
+                <div class="grid-40" id="nav-grid"></div>
                 <div class="sidebar-footer">
-                    <button class="btn-finish" onclick="finalizarProva()">ENVIAR PROVA</button>
+                    <button class="btn-finish" onclick="finalizarProva()">FINALIZAR PROVA</button>
                 </div>
             </aside>
 
             <main class="question-area">
                 <header class="q-top-bar">
                     <span class="exam-info">Caderno: <strong id="caderno-ativo">Prova 01</strong></span>
-                    <span class="timer">Tempo: nao sei quanto tempo é a prova</span>
+                    <span class="timer">Tempo: 01:59:32</span>
                 </header>
 
                 <div class="scrollable-content">
                     <div class="question-card">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="q-badge" id="q-numero">Questão 1</span>    
+                            <span class="q-badge" id="q-numero">Questão 1</span>
                         </div>
                         
                         <p class="q-text" id="q-enunciado">Carregando...</p>
+
+                        <img id="q-imagem-preview" src="" alt="Imagem da questão" class="q-image hidden-img">
+
+                        <div class="options-group" id="q-opcoes"></div>
                         
-                        <div class="q-image-placeholder">
-                            [ Imagem caso tiverkk ]
-                        </div>
-
-                        <div class="options-group" id="q-opcoes">
-                            </div>
-
                         <div class="internal-nav">
                             <button class="btn-nav-int" id="btn-prev" onclick="navegar(-1)">Anterior</button>
                             <button class="btn-nav-int primary" id="btn-next" onclick="navegar(1)">Próxima</button>
@@ -109,6 +103,25 @@
         </div>
     </section>
 
-    <script src="app.js"></script>
+    <section id="screen-result" class="screen hidden">
+        <div class="container-center">
+            <div class="result-card">
+                <h2>Desempenho Final</h2>
+                <p>Confira abaixo o resumo da sua avaliação.</p>
+                
+                <div class="chart-container">
+                    <canvas id="graficoResultado"></canvas>
+                </div>
+
+                <div class="result-stats">
+                    <p>Você acertou <strong id="txt-acertos" style="color: #10b981;">0</strong> de 40 questões.</p>
+                </div>
+
+                <button class="btn-primary" onclick="location.reload()">VOLTAR AO INÍCIO</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
 </body>
 </html>
