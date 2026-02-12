@@ -1,11 +1,11 @@
-/* --- CONFIGURAÇÕES --- */
+/* --- config báisca --- */
 const TOTAL_QUESTOES = 40;
 let bancoQuestoes = [];
 let indiceAtual = 0;
 let respostasUsuario = {};
 let graficoInstance = null; 
 
-/* --- GERADORES --- */
+/* --- gerador dos anos --- */
 function gerarBotoesAnos() {
     const container = document.getElementById('year-grid');
     if (!container) return;
@@ -26,24 +26,24 @@ function gerarBancoDeDados() {
     const letrasPossiveis = ['A', 'B', 'C', 'D', 'E'];
 
     for (let i = 1; i <= TOTAL_QUESTOES; i++) {
-        // Sorteia uma letra aleatória para ser a certa, mas não mostra no texto
+        // Sorteia uma questão certa
         const respostaRandom = letrasPossiveis[Math.floor(Math.random() * letrasPossiveis.length)];
         
-        // Configuração padrão
+        // Config padrão da pergunta
         let textoQuestao = `Questão ${i}: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Analise as alternativas e selecione a correta de acordo com seus conhecimentos.`;
         let imagemUrl = null;
 
-        // EXEMPLO: Adicionando imagem apenas na Questão 5
+        // eu fiz essa aqui de exemplo pra quando tem imagem, e pra colocar uma foto do carequinha também
         if (i === 5) {
             textoQuestao = `Questão ${i}: Observe a imagem abaixo e assinale a alternativa que melhor descreve essa carequinha perfeita`;
-            // Placeholder de imagem (um gráfico genérico)
+            //imagem placeholder do gru macaco pardal
             imagemUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFr9JARZmh1boDlGkX7Nc472barwzseq3pjQ&s';
         }
 
         bancoQuestoes.push({
             id: i,
             enunciado: textoQuestao,
-            imagem: imagemUrl, // Propriedade nova
+            imagem: imagemUrl, 
             alternativas: [
                 "Alternativa A: Lorem ipsum dolor sit amet.",
                 "Alternativa B: Consectetur adipiscing elit.",
@@ -56,7 +56,7 @@ function gerarBancoDeDados() {
     }
 }
 
-/* --- NAVEGAÇÃO --- */
+/* --- dunção de navegação sinistra ai mo dificilkk --- */
 function irPara(idTela) {
     document.querySelectorAll('.screen').forEach(s => {
         s.classList.remove('active');
@@ -87,7 +87,7 @@ function iniciarProva(numCaderno) {
     irPara('screen-taking-exam');
 }
 
-/* --- LÓGICA DA PROVA --- */
+/* --- logica da prova pra exibir tudo, as questões etc --- */
 function carregarQuestao(indice) {
     if (indice < 0 || indice >= TOTAL_QUESTOES) return;
     indiceAtual = indice;
@@ -96,7 +96,7 @@ function carregarQuestao(indice) {
     document.getElementById('q-numero').innerText = `Questão ${indice + 1}`;
     document.getElementById('q-enunciado').innerText = questao.enunciado;
 
-    // Lógica da Imagem
+    // Lógica pra puxar a foto quando tiver e esconder quando não tiver
     const imgElement = document.getElementById('q-imagem-preview');
     if (questao.imagem) {
         imgElement.src = questao.imagem;
@@ -157,7 +157,7 @@ function navegar(direcao) {
     if (novoIndice >= 0 && novoIndice < TOTAL_QUESTOES) carregarQuestao(novoIndice);
 }
 
-/* --- FINALIZAÇÃO E GRÁFICO --- */
+/* --- finalizar prova e faz o gráfico --- */
 function finalizarProva() {
     const respondidas = Object.keys(respostasUsuario).length;
     
@@ -167,7 +167,7 @@ function finalizarProva() {
         if(!confirm("Tem certeza que deseja finalizar a prova?")) return;
     }
 
-    // Calcula Acertos (A resposta certa está no banco, mas escondida do usuário)
+    // Calcula acertos pra fazer o graph
     let acertos = 0;
     for (let i = 0; i < TOTAL_QUESTOES; i++) {
         const respostaDada = respostasUsuario[i];
@@ -177,7 +177,6 @@ function finalizarProva() {
         }
     }
 
-    // Exibe Tela de Resultado
     document.getElementById('txt-acertos').innerText = acertos;
     gerarGrafico(acertos, TOTAL_QUESTOES - acertos);
     irPara('screen-result');
@@ -186,7 +185,6 @@ function finalizarProva() {
 function gerarGrafico(acertos, erros) {
     const ctx = document.getElementById('graficoResultado').getContext('2d');
     
-    // Se já existir gráfico anterior, destrói para criar o novo
     if (graficoInstance) {
         graficoInstance.destroy();
     }
@@ -197,7 +195,7 @@ function gerarGrafico(acertos, erros) {
             labels: ['Acertos', 'Erros'],
             datasets: [{
                 data: [acertos, erros],
-                backgroundColor: ['#10b981', '#ef4444'], // Verde e Vermelho
+                backgroundColor: ['#10b981', '#ef4444'], 
                 borderWidth: 0
             }]
         },
